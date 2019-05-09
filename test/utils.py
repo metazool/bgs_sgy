@@ -15,6 +15,7 @@ class ValidationError(Exception):
 
 
 def fixture_dir(*args):
+    """Return a directory path, creating it if it doesnt exist yet"""
     dir_path = os.path.join(os.path.dirname(__file__), 'fixtures', *args)
     if not os.path.isdir(os.path.dirname(dir_path)):
         os.makedirs(os.path.dirname(dir_path))
