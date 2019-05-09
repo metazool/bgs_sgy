@@ -13,19 +13,26 @@ def download_urls(datasets, suffix=None):
     """Given a list of dataset IDs, return a list of associated downloadable files"""
     downloadable = []
     for _id in datasets:
-        response = requests.get(f'{API}/item/{_id}', verify=False)
-        metadata = None
-        try:
-            metadata = response.json()
-        except json.decoder.JSONDecodeError:
-            logging.error(f"no valid data for {_id}")
-            continue
-        downloadable += file_urls(metadata['attributes'], suffix=suffix)
+        metadata = dataset_metadata(_id)
+        downloadable += file_urls(metadata.get('attributes', {}), suffix=suffix)
+        metadata = dataset_metadata(_id)
 
     return downloadable
 
+
+def dataset_metadata(_id):
+    """Given an ID collect the dataset metadata from BGS accessions"""
+    response = requests.get(f'{API}/item/{_id}', verify=False)
+    metadata = {}
+    try:
+        metadata = response.json()
+    except json.decoder.JSONDecodeError:
+        logging.error(f"no valid data for {_id}")
+    return metadata
+
+
 def file_urls(metadata, suffix=None):
-    """Given the metadat afor a dataset create list of file URLS"""
+    """Given the metadata for a dataset create list of file URLS"""
     downloadable = []
 
     for item in metadata.get('fileList', []):
