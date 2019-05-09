@@ -15,12 +15,12 @@ def download_urls(datasets, suffix=None):
     for _id in datasets:
         metadata = dataset_metadata(_id)
         downloadable += file_urls(metadata.get('attributes', {}), suffix=suffix)
-        metadata = dataset_metadata(_id)
+        metadata = get_dataset_metadata(_id)
 
     return downloadable
 
 
-def dataset_metadata(_id):
+def get_dataset_metadata(_id):
     """Given an ID collect the dataset metadata from BGS accessions"""
     response = requests.get(f'{API}/item/{_id}', verify=False)
     metadata = {}
@@ -36,12 +36,13 @@ def file_urls(metadata, suffix=None):
     downloadable = []
 
     for item in metadata.get('fileList', []):
-        url = f"{API}/download/{metadata['id']}?fileName={item['name']}"
         if suffix and item.get('type') != suffix:
             continue
-        downloadable.append(url)
+        downloadable.append(file_url(dataset_id, item['name']))
 
-    return downloadable
+
+def file_url(dataset_id, filename):
+    return f"{API}/download/{dataset_id}?fileName={filename}"
 
 
 if __name__ == '__main__':
