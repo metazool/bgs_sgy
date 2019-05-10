@@ -35,7 +35,7 @@ def dataset_metadata():
     return md
 
 
-def make_local_copies(limit=5, repeat=False):
+def get_local_copies(limit=5, repeat=False):
     """Download and cache data. TODO limit results rather than sizes / samples"""
     samples = []
     sampled_datasets = []

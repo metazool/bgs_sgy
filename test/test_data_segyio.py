@@ -6,7 +6,7 @@ import requests
 import segyio
 
 from datasets import get_dataset_metadata
-from test.utils import fixture_dir, dataset_metadata, make_local_copies, ValidationError
+from test.utils import fixture_dir, dataset_metadata, get_local_copies, ValidationError
 
 # Skip past files larger than this arbitrary limit
 MAX_FILE_SIZE = 320000000
@@ -33,9 +33,9 @@ def test_collect_data(dataset_ids):
             store_data.write(json.dumps(metadata))
 
 
-def test_can_open(dataset_ids):
+def test_can_open():
     """Can we run segyio.open without qualification on this data"""
-    samples = make_local_copies(limit=5)
+    samples = get_local_copies(limit=5)
     success = []
     failure = []
     for sample in samples:
@@ -50,3 +50,19 @@ def test_can_open(dataset_ids):
     if len(failure):
         raise ValidationError(failure)
 
+
+def test_ignore_geometry():
+    """If open fails, then why? First step is to pass ignore_geometry
+    and inspect some of the header lines as per
+    https://github.com/equinor/segyio/issues/322#issuecomment-438517387"""
+    samples = get_local_copies()
+    attributes = {}
+    for sample in samples:
+        attrs = {}
+        useful_indexes = [5, 21, 37]
+        with segyio.open(sample, ignore_geometry=True) as sgy:
+            for i in useful_indexes:
+                attrs[i] = sgy.attributes(i)[:]
+            attributes[sample] = attrs
+    # For now just dump the output into the logs
+    print(attributes)
